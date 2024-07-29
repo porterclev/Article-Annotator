@@ -29,6 +29,13 @@ export function getSchema(sequelize) {
 		value: { type: Sequelize.NUMBER },
 		metadata: { type: Sequelize.STRING }
 	})
+    const Article =  sequelize.define('articles', {
+		url: { type: Sequelize.STRING },
+        comments: { type: Sequelize.NUMBER },
+		metadata: { type: Sequelize.STRING },
+        content: { type: Sequelize.STRING }
+	})
 
-	return { Number }
+
+	return { Number, Article }
 }
