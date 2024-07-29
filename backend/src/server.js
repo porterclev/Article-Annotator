@@ -53,7 +53,7 @@ async function run() {
   })
 
   async function computeAverage() {
-    const numbers = await models.Article.findAll()
+    const numbers = await models.Number.findAll()
     let average = 0
     for (let item of numbers) {
       average += item.value
@@ -66,13 +66,15 @@ async function run() {
 
   //////// API routes
 // Give URL -> Fetch HTML -> Display to user (disk?) -> document.designMode = "on" (edit mode) -> check change each second
-  app.post('/addNumberForm', async function (request, response) {
-    console.log(request.body)
+  app.post('/addURL', async function (request, response) {
+    const { urlInput } = request.body
+
+    console.log(urlInput)
     await models.Article.create({
-      value: request.body['rand-num']
+       url: request.body['site-url']
     })
 
-    return response.status(200).send("Done!")
+    return response.json({ done: true })
   })
 
   app.post('/addNumber', async function (request, response) {

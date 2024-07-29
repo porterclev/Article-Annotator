@@ -24,9 +24,9 @@ class SampleComponent extends HTMLElement {
 		let inputElement = document.createElement('div')
 		inputElement.innerHTML = 
 		`	
-		<form method='post' action="addNumberForm">
-			<p>Choose a random number:</p>
-			<input name="rand-num" id="rand-num" style="margin:5px"></input>
+		<form method='post' action="addURL">
+			<p>Input URL:</p>
+			<input name="site-url" id="site-url" style="margin:5px"></input>
 		  <input id="submitBtn" type='submit' value='submit' />
 	  </form>  
 		
