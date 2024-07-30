@@ -12,7 +12,10 @@ import bodyParser from 'body-parser'
 import { Op } from 'sequelize';
 import zlib from 'zlib'
 import util from 'util'
+import { JSDOM } from 'jsdom'
 const gunzip = util.promisify(zlib.gunzip);
+import * as urlSlug from 'url-slug'
+import * as UrlUtil from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const DATA_DIRECTORY =  path.join(__dirname, '../.data/')
@@ -51,7 +54,7 @@ async function run() {
   app.get("/about", async function(request, response) {
     response.render('about')
   })
-
+    
   async function computeAverage() {
     const numbers = await models.Number.findAll()
     let average = 0
@@ -68,13 +71,31 @@ async function run() {
 // Give URL -> Fetch HTML -> Display to user (disk?) -> document.designMode = "on" (edit mode) -> check change each second
   app.post('/addURL', async function (request, response) {
     const { urlInput } = request.body
+    const urlString = request.body['site-url']
+    const parsedUrl = UrlUtil.parse(urlString)
+    const finalUrl = UrlUtil.format(parsedUrl)
+    const hash = urlSlug.convert(finalUrl.replace("https://", ""))
+    const filepath = `${ARCHIVE_DIRECTORY}/${hash}.html`
 
     console.log(urlInput)
-    await models.Article.create({
-       url: request.body['site-url']
-    })
-
-    return response.json({ done: true })
+    
+    // fetch substack page, extra meta tags
+    let htmlPage
+    try {
+      const articleRequest = await fetch(request.body['site-url']);
+      htmlPage = await articleRequest.text();
+    } catch (e) {
+      response.json({ done: false, error: String(e)  })
+      return 
+    }
+     
+      await models.Article.create({
+          url: finalUrl,
+          content: htmlPage
+      })
+    const dom = new JSDOM(htmlPage);
+    fs.writeFileSync(filepath, htmlPage); 
+    return response.redirect(`archives/${hash}.html`)
   })
 
   app.post('/addNumber', async function (request, response) {
