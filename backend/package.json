@@ -21,7 +21,8 @@
     "sequelize": "^6.35.1",
     "sqlite3": "^5.1.7",
     "url-slug": "^4.0.1",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "website-scraper": "^5.3.1"
   },
   "type": "module"
 }

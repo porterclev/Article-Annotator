@@ -1,5 +1,5 @@
 import express from 'express'
-import { engine } from 'express-handlebars';
+import { engine, create } from 'express-handlebars';
 import { connectToDB } from './db.js'
 import { makeRandomToken } from './randomToken.js'
 import { dirname } from 'path';
@@ -13,6 +13,7 @@ import { Op } from 'sequelize';
 import zlib from 'zlib'
 import util from 'util'
 import { JSDOM } from 'jsdom'
+import scrape from 'website-scraper'
 const gunzip = util.promisify(zlib.gunzip);
 import * as urlSlug from 'url-slug'
 import * as UrlUtil from 'url';
@@ -22,6 +23,7 @@ const DATA_DIRECTORY =  path.join(__dirname, '../.data/')
 const TEMP_ZIP_FILE_DIR = path.join(DATA_DIRECTORY, 'temp')
 const ARCHIVE_DIRECTORY = path.join(__dirname, '../public/archives')
 
+const expresshandlebars = create();
 async function run() {
   const { sequelize, models } = await connectToDB()
 
@@ -94,7 +96,21 @@ async function run() {
           content: htmlPage
       })
     const dom = new JSDOM(htmlPage);
-    fs.writeFileSync(filepath, htmlPage); 
+    function query(str) {
+      return dom.window.document.querySelector(str).content
+    }
+    console.log(finalUrl); 
+    //const options = {
+    //    urls: [finalUrl],
+    //    directory: [`${ARCHIVE_DIRECTORY}/test`]
+    //}
+    //scrape(options).then((result) => {
+    //    console.log(result);
+    //});
+
+    const templateSource = fs.readFileSync('./views/layouts/main.handlebars', 'utf-8')
+    const generatedtemplate = expresshandlebars.handlebars.compile(templateSource);
+    fs.writeFileSync(filepath, generatedtemplate({ body: htmlPage }), 'utf-8'); 
     return response.redirect(`archives/${hash}.html`)
   })
 
@@ -105,7 +121,7 @@ async function run() {
     await models.Number.create({
       value: number
     })
-
+ 
     return response.json({ done: true })
   })
 
